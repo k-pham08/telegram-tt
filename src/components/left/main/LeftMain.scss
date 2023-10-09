@@ -4,6 +4,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: rgba($color: #000000, $alpha: 0.08);
+  border-radius: 0 0 0 44px;
 
   > .Transition {
     flex: 1;
@@ -32,9 +34,12 @@
       padding-bottom: 1px;
       border-bottom: 0;
       z-index: 1;
-
       opacity: 1;
-      transition: opacity var(--layer-transition);
+      /**
+       * TL - Custom animation for TabList whenever the tab is selected or disabled.
+       */
+      transform: translateY(var(--tab-folder-translate));
+      transition: opacity var(--layer-transition), transform 0.1s ease-out;
     }
 
     &--tabs-hidden .TabList {
@@ -46,6 +51,7 @@
       flex: 0 0 auto;
       padding-left: 0.625rem;
       padding-right: 0.625rem;
+      pointer-events: var(--disable-tab-click);
 
       > span {
         padding-left: 0.5rem;

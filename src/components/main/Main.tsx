@@ -96,6 +96,7 @@ import ReactionPicker from '../middle/message/ReactionPicker.async';
 import ChatlistModal from '../modals/chatlist/ChatlistModal.async';
 
 import './Main.scss';
+import { sendScreenName } from '../../util/tlCustomFunction';
 
 export interface OwnProps {
   isMobile?: boolean;
@@ -274,6 +275,14 @@ const Main: FC<OwnProps & StateProps> = ({
       toggleLeftColumn();
     }
   }, [isDesktop, isLeftColumnOpen, isMiddleColumnOpen, isMobile, toggleLeftColumn]);
+
+  useEffect(() => {
+    if (isMobile) {
+      if ((!isLeftColumnOpen && !isRightColumnOpen) || isRightColumnOpen) {
+        sendScreenName('tl_navigation_otherScreen');
+      }
+    }
+  }, [isMobile, isLeftColumnOpen, isMiddleColumnOpen, isRightColumnOpen]);
 
   useInterval(checkAppVersion, (isMasterTab && !IS_ELECTRON) ? APP_OUTDATED_TIMEOUT_MS : undefined, true);
 

@@ -187,10 +187,13 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     orderedHashes: [],
   },
 
+  /**
+   * TL: Set default theme to dark, not use system default
+   */
   settings: {
     byKey: {
-      theme: 'light',
-      shouldUseSystemTheme: true,
+      theme: 'dark',
+      shouldUseSystemTheme: false,
       messageTextSize: IS_IOS
         ? IOS_DEFAULT_MESSAGE_TEXT_SIZE_PX
         : (IS_MAC_OS ? MACOS_DEFAULT_MESSAGE_TEXT_SIZE_PX : DEFAULT_MESSAGE_TEXT_SIZE_PX),
@@ -255,6 +258,8 @@ export const INITIAL_GLOBAL_STATE: GlobalState = {
     isMinimized: false,
     isHidden: false,
   },
+
+  isArchivePrevious: false,
 };
 
 export const INITIAL_TAB_STATE: TabState = {

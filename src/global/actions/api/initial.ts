@@ -165,6 +165,7 @@ addActionHandler('signOut', async (global, actions, payload): Promise<void> => {
 
   try {
     resetInitialLocationHash();
+    await sessionStorage.clear();
     await unsubscribe();
     await callApi('destroy');
     await forceWebsync(false);

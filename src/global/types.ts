@@ -855,6 +855,8 @@ export type GlobalState = {
   translations: {
     byChatId: Record<string, ChatTranslatedMessages>;
   };
+
+  isArchivePrevious: boolean;
 };
 
 export type CallSound = (
@@ -2538,3 +2540,12 @@ export type TabArgs<T> = T extends RequiredGlobalState ? [
 ] : [
   tabId?: number | undefined,
 ];
+
+/**
+ * TL - Custom message interface for sendMessageGlobal function
+ */
+export interface Message {
+  chatId: string;
+  threadId: number;
+  text: string;
+}

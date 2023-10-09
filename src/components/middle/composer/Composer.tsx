@@ -1,8 +1,8 @@
 import React, {
-  memo, useEffect, useMemo, useRef, useState,
+  memo, useCallback, useEffect, useMemo, useRef, useState,
 } from '../../../lib/teact/teact';
 import { requestMeasure, requestNextMutation } from '../../../lib/fasterdom/fasterdom';
-import { getActions, withGlobal } from '../../../global';
+import { getActions, getGlobal, withGlobal } from '../../../global';
 
 import type { FC } from '../../../lib/teact/teact';
 import type {
@@ -230,6 +230,8 @@ const MESSAGE_MAX_LENGTH = 4096;
 const SENDING_ANIMATION_DURATION = 350;
 const MOUNT_ANIMATION_DURATION = 430;
 
+let interval: any;
+
 const Composer: FC<OwnProps & StateProps> = ({
   isOnActiveTab,
   dropAreaState,
@@ -308,6 +310,7 @@ const Composer: FC<OwnProps & StateProps> = ({
     addRecentCustomEmoji,
     showNotification,
     showAllowedMessageTypesNotification,
+    sendDefaultReaction,
   } = getActions();
 
   const lang = useLang();
@@ -327,6 +330,17 @@ const Composer: FC<OwnProps & StateProps> = ({
   // Prevent Symbol Menu from closing when calendar is open
   const [isSymbolMenuForced, forceShowSymbolMenu, cancelForceShowSymbolMenu] = useFlag();
   const sendMessageAction = useSendMessageAction(chatId, threadId);
+
+  useEffect(() => {
+    const clearIntervalFn = () => {
+      clearInterval(interval);
+    };
+    window.addEventListener('cleanup-interval', clearIntervalFn);
+
+    return () => {
+      window.removeEventListener('cleanup-interval', clearIntervalFn);
+    };
+  }, []);
 
   useEffect(processMessageInputForCustomEmoji, [getHtml]);
 
@@ -1160,6 +1174,7 @@ const Composer: FC<OwnProps & StateProps> = ({
         void handleSend();
         break;
       case MainButtonState.Record: {
+        inputRef.current?.blur();
         if (areVoiceMessagesNotAllowed) {
           if (!canSendVoiceByPrivacy) {
             showNotification({
@@ -1257,6 +1272,40 @@ const Composer: FC<OwnProps & StateProps> = ({
 
   const withBotCommands = isChatWithBot && botMenuButton?.type === 'commands' && !editingMessage
     && botCommands !== false && !activeVoiceRecording;
+
+  /**
+   * TL - Send a post message to Timeless Wallet
+   * Description: The data is an object with 2 properties: chatId and threadId
+   */
+  const handleSendCrypto = useCallback(() => {
+    (window as any).webkit?.messageHandlers?.sendCrypto.postMessage({
+      chatId,
+    });
+  }, [chatId]);
+
+  const handleGetLastMessageId = useCallback(() => {
+    return getGlobal().chats.byId[chatId].lastMessage?.id;
+  }, [chatId]);
+
+  /**
+   * TL - Create POAP function
+   */
+  const handleCreatePOAP = () => {
+    (window as any).webkit?.messageHandlers?.createPOAP.postMessage({
+      chatId,
+    });
+
+    const currentMessageId = handleGetLastMessageId();
+    if (currentMessageId) {
+      interval = setInterval(() => {
+        const messageId = handleGetLastMessageId();
+        if (currentMessageId !== messageId && messageId) {
+          sendDefaultReaction({ chatId, messageId });
+          window.dispatchEvent(new Event('cleanup-interval'));
+        }
+      }, 5000);
+    }
+  };
 
   return (
     <div className={className}>
@@ -1506,6 +1555,9 @@ const Composer: FC<OwnProps & StateProps> = ({
             isScheduled={shouldSchedule}
             attachBots={attachBots}
             peerType={attachMenuPeerType}
+            isChatWithBot={(isChatWithBot || isChatWithSelf) ?? false}
+            handleSendCrypto={handleSendCrypto}
+            handleCreatePOAP={handleCreatePOAP}
             shouldCollectDebugLogs={shouldCollectDebugLogs}
             theme={theme}
           />

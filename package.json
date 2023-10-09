@@ -1,6 +1,6 @@
 {
   "name": "telegram-t",
-  "version": "1.61.44",
+  "version": "1.61.46",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -132,6 +132,7 @@
     "telegraph-node": "^1.0.4",
     "typescript": "^5.0.2",
     "webpack": "^5.76.2",
+    "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.13.1",
     "whatwg-fetch": "^3.6.2"
   },

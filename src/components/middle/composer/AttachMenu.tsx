@@ -41,10 +41,13 @@ export type OwnProps = {
   canSendAudios: boolean;
   isScheduled?: boolean;
   attachBots: GlobalState['attachMenu']['bots'];
+  isChatWithBot: boolean;
   peerType?: ApiAttachMenuPeerType;
   shouldCollectDebugLogs?: boolean;
   onFileSelect: (files: File[], shouldSuggestCompression?: boolean) => void;
   onPollCreate: () => void;
+  handleSendCrypto: () => void;
+  handleCreatePOAP: () => void;
   theme: ISettings['theme'];
 };
 
@@ -61,8 +64,11 @@ const AttachMenu: FC<OwnProps> = ({
   attachBots,
   peerType,
   isScheduled,
+  isChatWithBot,
   onFileSelect,
   onPollCreate,
+  handleSendCrypto,
+  handleCreatePOAP,
   theme,
   shouldCollectDebugLogs,
 }) => {
@@ -73,6 +79,7 @@ const AttachMenu: FC<OwnProps> = ({
   const canSendVideoOrPhoto = canSendPhotos || canSendVideos;
 
   const [isAttachmentBotMenuOpen, markAttachmentBotMenuOpen, unmarkAttachmentBotMenuOpen] = useFlag();
+
   useEffect(() => {
     if (isAttachMenuOpen) {
       markMouseInside();
@@ -154,7 +161,7 @@ const AttachMenu: FC<OwnProps> = ({
         positionX="right"
         positionY="bottom"
         onClose={closeAttachMenu}
-        className="AttachMenu--menu fluid"
+        className={isAttachMenuOpen || isAttachmentBotMenuOpen ? 'AttachMenu--menu fluid' : 'AttachMenuHidden'}
         onCloseAnimationEnd={closeAttachMenu}
         onMouseEnter={!IS_TOUCH_ENV ? handleMouseEnter : undefined}
         onMouseLeave={!IS_TOUCH_ENV ? handleMouseLeave : undefined}
@@ -176,12 +183,12 @@ const AttachMenu: FC<OwnProps> = ({
                   : (canSendPhotos ? 'InputAttach.Popover.Photo' : 'InputAttach.Popover.Video'))}
               </MenuItem>
             )}
-            {(canSendDocuments || canSendAudios)
+            {/* {(canSendDocuments || canSendAudios)
               && (
                 <MenuItem icon="document" onClick={handleDocumentSelect}>
                   {lang(!canSendDocuments && canSendAudios ? 'InputAttach.Popover.Music' : 'AttachDocument')}
                 </MenuItem>
-              )}
+              )} */}
             {canSendDocuments && shouldCollectDebugLogs && (
               <MenuItem icon="bug" onClick={handleSendLogs}>
                 {lang('DebugSendLogs')}
@@ -191,6 +198,37 @@ const AttachMenu: FC<OwnProps> = ({
         )}
         {canAttachPolls && (
           <MenuItem icon="poll" onClick={onPollCreate}>{lang('Poll')}</MenuItem>
+        )}
+        {/**
+           * TL - Add send crypto button to attachments
+           * Description: Only chat 1-1 (except with bot and self) or group has this button
+           */}
+        {!isChatWithBot && Number(chatId) >= 0 && (
+          <MenuItem
+            icon="lock"
+            className="margin-left-1px"
+            customIcon={(
+              <img className="icon" src="./wallet_20px.svg" alt="" />
+            )}
+            onClick={handleSendCrypto}
+          >
+            {lang('Send Crypto')}
+          </MenuItem>
+        )}
+        {/**
+         * TL - Add create POAP button to attachments
+         */}
+        {!isChatWithBot && Number(chatId) >= 0 && (
+          <MenuItem
+            icon="lock"
+            className="margin-left-1px"
+            customIcon={(
+              <img className="icon" src="./camera_macro.svg" alt="" />
+            )}
+            onClick={handleCreatePOAP}
+          >
+            {lang('Create POAP')}
+          </MenuItem>
         )}
 
         {canAttachMedia && !isScheduled && bots.map((bot) => (

@@ -2,13 +2,20 @@
 
 import type { ApiLangPack } from '../api/types';
 
+/**
+ * TL - Add some language constants support.
+ */
 export const fallbackLangPackInitial = {
   WrongNumber: 'Wrong number?',
-  SentAppCode: 'We\'ve sent the code to the **Telegram** app on your other device.',
+  SentAppCode1: 'We have sent you a message in ',
+  SentAppCode2: 'Telegram with the verfication code.',
+  VerifyAppCode: '5 digits verification code',
+  EnterCode: 'Enter verification code',
   'Login.JustSentSms': 'We have sent you a code via SMS. Please enter it above.',
   'Login.Header.Password': 'Enter Password',
   'Login.EnterPasswordDescription': 'You have Two-Step Verification enabled, so your account is protected with an additional password.',
-  StartText: 'Please confirm your country code and enter your phone number.',
+  StartText1: 'Please enter your phone number ',
+  StartText2: 'associated with your telegram account.',
   'Login.PhonePlaceholder': 'Your phone number',
   'Login.Next': 'Next',
   'Login.QR.Login': 'Log in by QR Code',

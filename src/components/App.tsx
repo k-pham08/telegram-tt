@@ -16,8 +16,6 @@ import { addActiveTabChangeListener } from '../util/activeTabMonitor';
 import { hasStoredSession } from '../util/sessions';
 import buildClassName from '../util/buildClassName';
 import { parseInitialLocationHash } from '../util/routing';
-import { setupBeforeInstallPrompt } from '../util/installPrompt';
-
 import useFlag from '../hooks/useFlag';
 import usePrevious from '../hooks/usePrevious';
 import useAppLayout from '../hooks/useAppLayout';
@@ -31,6 +29,9 @@ import UiLoader from './common/UiLoader';
 // import Test from './test/TestSvg';
 
 import styles from './App.module.scss';
+import { setupBeforeInstallPrompt } from '../util/installPrompt';
+import { mobileSubscribe, mobileUnsubscribe } from '../util/notifications';
+import { handleSendMessage } from '../util/tlCustomFunction';
 
 type StateProps = {
   authState: GlobalState['authState'];
@@ -197,15 +198,24 @@ const App: FC<StateProps> = ({
   }
 
   useLayoutEffect(() => {
+    /**
+     * TL - Set window properties for easier call function from native App
+     */
+    const { signOut } = getActions();
+    (window as any).signOutGlobal = signOut;
+    (window as any).handleSendMessageGlobal = handleSendMessage;
     document.body.classList.add(styles.bg);
+    (window as any).mobileSubscribeGlobal = mobileSubscribe;
+    (window as any).mobileUnsubscribeGlobal = mobileUnsubscribe;
   }, []);
 
   useLayoutEffect(() => {
-    document.body.style.setProperty(
-      '--theme-background-color',
-      theme === 'dark' ? DARK_THEME_BG_COLOR : LIGHT_THEME_BG_COLOR,
-    );
+    sessionStorage.clear();
   }, [theme]);
+
+  useEffect(() => {
+    sessionStorage.setItem('isExpandHeader', 'false');
+  }, []);
 
   return (
     <UiLoader page={page} isMobile={isMobile}>

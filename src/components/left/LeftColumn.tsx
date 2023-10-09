@@ -2,7 +2,7 @@ import type { RefObject } from 'react';
 import React, {
   memo, useEffect, useState,
 } from '../../lib/teact/teact';
-import { getActions, withGlobal } from '../../global';
+import { getActions, getGlobal, withGlobal } from '../../global';
 
 import type { GlobalState } from '../../global/types';
 import { LeftColumnContent, SettingsScreens } from '../../types';
@@ -25,6 +25,7 @@ import NewChat from './newChat/NewChat.async';
 import ArchivedChats from './ArchivedChats.async';
 
 import './LeftColumn.scss';
+import { sendScreenName } from '../../util/tlCustomFunction';
 
 interface OwnProps {
   ref: RefObject<HTMLDivElement>;
@@ -101,6 +102,7 @@ function LeftColumn({
   let contentType: ContentType = ContentType.Main;
   switch (content) {
     case LeftColumnContent.Archived:
+      sendScreenName('tl_navigation_otherScreen');
       contentType = ContentType.Archived;
       break;
     case LeftColumnContent.Settings:
@@ -108,17 +110,30 @@ function LeftColumn({
       break;
     case LeftColumnContent.NewChannelStep1:
     case LeftColumnContent.NewChannelStep2:
+      sendScreenName('tl_navigation_otherScreen');
       contentType = ContentType.NewChannel;
       break;
     case LeftColumnContent.NewGroupStep1:
     case LeftColumnContent.NewGroupStep2:
+      sendScreenName('tl_navigation_otherScreen');
       contentType = ContentType.NewGroup;
       break;
   }
 
+  useEffect(() => {
+    if (settingsScreen === SettingsScreens.Main && contentType === ContentType.Main) {
+      sendScreenName('tl_navigation_mainScreen');
+    } else {
+      sendScreenName('tl_navigation_otherScreen');
+    }
+  }, [settingsScreen, contentType]);
+
   const handleReset = useLastCallback((forceReturnToChatList?: true | Event) => {
     function fullReset() {
       setContent(LeftColumnContent.ChatList);
+      if (content === LeftColumnContent.NewGroupStep1 || content === LeftColumnContent.NewChannelStep1) {
+        sendScreenName('tl_navigation_mainScreen');
+      }
       setSettingsScreen(SettingsScreens.Main);
       setContactsFilter('');
       setGlobalSearchClosing({ isClosing: true });
@@ -507,6 +522,7 @@ function LeftColumn({
       shouldWrap
       wrapExceptionKey={ContentType.Main}
       id="LeftColumn"
+      className="tl-custom-padding"
     >
       {renderContent}
     </Transition>

@@ -1,5 +1,5 @@
-import React, { memo } from '../../lib/teact/teact';
-import { getActions } from '../../global';
+import React, { memo, useEffect, useRef } from '../../lib/teact/teact';
+import { getActions, getGlobal } from '../../global';
 
 import type { FC } from '../../lib/teact/teact';
 import type { LeftColumnContent, SettingsScreens } from '../../types';
@@ -22,6 +22,7 @@ import DropdownMenu from '../ui/DropdownMenu';
 import MenuItem from '../ui/MenuItem';
 
 import './ArchivedChats.scss';
+import { sendScreenName } from '../../util/tlCustomFunction';
 
 export type OwnProps = {
   isActive: boolean;
@@ -72,6 +73,12 @@ const ArchivedChats: FC<OwnProps> = ({
   } = useForumPanelRender(isForumPanelOpen);
   const isForumPanelVisible = isForumPanelOpen && isAnimationStarted;
 
+  const backHandler = () => {
+    sendScreenName('tl_navigation_mainScreen');
+    getGlobal().isArchivePrevious = false;
+    onReset();
+  };
+
   return (
     <div className="ArchivedChats">
       <div className="left-header">
@@ -80,7 +87,7 @@ const ArchivedChats: FC<OwnProps> = ({
           round
           size="smaller"
           color="translucent"
-          onClick={onReset}
+          onClick={backHandler}
           ariaLabel="Return to chat list"
           className={buildClassName(
             lang.isRtl && 'rtl',
